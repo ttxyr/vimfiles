@@ -43,40 +43,44 @@ set ruler
 " 命令栏的高度
 set cmdheight=2
 
-" A buffer becomes hidden when it is abandoned
+" 当abandoned时隐藏缓存区
 set hid
 
-" Configure backspace so it acts as it should act
+" 允许在某些字符上使用删除退格：eol换行符 indent自动缩进
+" start行开始位置
 set backspace=eol,start,indent
 set whichwrap+=<,>,h,l
 
-" Ignore case when searching
+" 查找时忽略大小写
 set ignorecase
 
-" When searching try to be smart about cases 
+" 智能查找，如果查找字符中包含大写字符，就关闭igorecase
 set smartcase
 
-" Highlight search results
+" 高亮查找结果
 set hlsearch
 
-" Makes search act like search in modern browsers
+" 找到结果时，显示结果位置，并且高亮结果
 set incsearch
 
-" Don't redraw while executing macros (good performance config)
+" 执行宏、寄存器和其它不通过输入的命令时屏幕不会重画
 set lazyredraw
 
-" For regular expressions turn magic on
+" 正则表达式匹配时，除了 $ . * ^ 之外其他元字符都要加反斜杠
 set magic
 
-" Show matching brackets when text indicator is over them
+" 高亮匹配括号
 set showmatch
-" How many tenths of a second to blink when matching brackets
+
+" 显示匹配括号的十分之一秒数
 set mat=2
 
-" No annoying sound on errors
+" 关闭一些错误提示音
 set noerrorbells
 set novisualbell
 set t_vb=
+
+" 毫秒计的等待键码或者映射的键序列完成的时间
 set tm=500
 
 
