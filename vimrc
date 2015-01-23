@@ -1,35 +1,290 @@
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Maintainer: 
+"       Amir Salihefendic
+"       http://amix.dk - amix@amix.dk
 "
+" Version: 
+"       5.0 - 29/05/12 15:43:36
 "
+" Blog_post: 
+"       http://amix.dk/blog/post/19691#The-ultimate-Vim-configuration-on-Github
 "
+" Awesome_version:
+"       Get this config, nice color schemes and lots of plugins!
 "
+"       Install the awesome version from:
 "
+"           https://github.com/amix/vimrc
+"
+" Syntax_highlighted:
+"       http://amix.dk/vim/vimrc.html
+"
+" Raw_version: 
+"       http://amix.dk/vim/vimrc.txt
+"
+" Sections:
+"    -> General
+"    -> VIM user interface
+"    -> Colors and Fonts
+"    -> Files and backups
+"    -> Text, tab and indent related
+"    -> Visual mode related
+"    -> Moving around, tabs and buffers
+"    -> Status line
+"    -> Editing mappings
+"    -> vimgrep searching and cope displaying
+"    -> Spell checking
+"    -> Misc
+"    -> Helper functions
 "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"	通用设定
+
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" 设置VIM历史记录行数
+" => General
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Sets how many lines of history VIM has to remember
 set history=700
 
-" 启用文件类型插件
+" Enable filetype plugins
 filetype plugin on
 filetype indent on
 
-" 自动读取文件
+" Set to auto read when a file is changed from the outside
 set autoread
+set nu
 
-" 扩展命令起始字符
+" With a map leader it's possible to do extra key combinations
+" like <leader>w saves the current file
 let mapleader = ","
 let g:mapleader = ","
 
-" 快速保存
+" Fast saving
 nmap <leader>w :w!<cr>
 
+" :W sudo saves the file 
+" (useful for handling the permission-denied error)
+"command W w !sudo tee % > /dev/null
+
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"	VIM用户接口 
+" => Plugin config
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" 光标上下两侧最少保留的屏幕行数
-set scrolloff=7
+set nocompatible              " be iMproved, required
+filetype off                  " required
+
+"set the runtime path to include Vundle and initialize
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+" alternatively, pass a path where Vundle should install plugins
+"call vundle#begin('~/some/path/here')
+
+" let Vundle manage Vundle, required
+Plugin 'gmarik/Vundle.vim'
+Plugin 'taglist.vim'
+Plugin 'OmniTags'
+Plugin 'The-NERD-tree'
+Plugin 'ctrlp.vim'
+Plugin 'EasyMotion'
+Plugin 'XPTemplate'
+Plugin 'ShowTrailingWhitespace'
+Plugin 'minibufexpl.vim'
+Plugin 'a.vim'
+Plugin 'SuperTab'
+Plugin 'neocomplcache'
+Plugin 'AutoTag'
+
+" The following are examples of different formats supported.
+" Keep Plugin commands between vundle#begin/end.
+" plugin on GitHub repo
+" Plugin 'tpope/vim-fugitive'
+" plugin from http://vim-scripts.org/vim/scripts.html
+" Plugin 'L9'
+" Git plugin not hosted on GitHub
+" Plugin 'git://git.wincent.com/command-t.git'
+" git repos on your local machine (i.e. when working on your own plugin)
+" Plugin 'file:///home/gmarik/path/to/plugin'
+" The sparkup vim script is in a subdirectory of this repo called vim.
+" Pass the path to set the runtimepath properly.
+" Plugin 'rstacruz/sparkup', {'rtp': 'vim/'}
+" Avoid a name conflict with L9
+" Plugin 'user/L9', {'name': 'newL9'}
+
+" All of your Plugins must be added before the following line
+call vundle#end()            " required
+filetype plugin indent on    " required
+" To ignore plugin indent changes, instead use:
+"filetype plugin on
+"
+" Brief help
+" :PluginList       - lists configured plugins
+" :PluginInstall    - installs plugins; append `!` to update or just :PluginUpdate
+" :PluginSearch foo - searches for foo; append `!` to refresh local cache
+" :PluginClean      - confirms removal of unused plugins; append `!` to auto-approve removal
+"
+" see :h vundle for more details or wiki for FAQ
+" Put your non-Plugin stuff after this line
+
+" return OS type, eg: windows, or linux, mac, et.st..
+function! MySys()
+	if has("win16") || has("win32") || has("win64") || has("win95")
+		return "windows"
+	elseif has("unix")
+		return "linux"
+	endif
+endfunction
+
+" 用户目录变量$VIMFILES
+if MySys() == "windows"
+	let $VIMFILES = $VIM.'/vimfiles'
+elseif MySys() == "linux"
+	let $VIMFILES = $HOME.'/.vim'
+endif
+
+" 设定doc文档目录
+let helptags=$VIMFILES.'/doc'
+
+" 设置字体 以及中文支持
+if has("win32")
+	set guifont=Inconsolata:h12:cANSI
+endif
+
+" 配置多语言环境
+if has("multi_byte")
+	" UTF-8 编码
+	set encoding=utf-8
+	set termencoding=utf-8
+	set formatoptions+=mM
+	set fencs=utf-8,gbk
+
+	if v:lang =~? '^\(zh\)\|\(ja\)\|\(ko\)'
+		set ambiwidth=double
+	endif
+
+	if has("win32")
+		source $VIMRUNTIME/delmenu.vim
+		source $VIMRUNTIME/menu.vim
+		language messages zh_CN.utf-8
+	endif
+else
+	echoerr "Sorry, this version of (g)vim was not compiled with +multi_byte"
+endif
+"-----------------------------------------------------------------
+" plugin - taglist.vim 查看函数列表，需要ctags程序
+"F4 打开隐藏taglist窗口
+"-----------------------------------------------------------------
+if MySys() == "windows" " 设定windows系统中ctags程序的位置
+	let Tlist_Ctags_Cmd = '"'.$VIMRUNTIME.'/ctags.exe"'
+elseif MySys() == "linux" " 设定windows系统中ctags程序的位置
+	let Tlist_Ctags_Cmd = '/usr/bin/ctags'
+endif
+nnoremap <silent><F4> :TlistToggle<CR>
+let Tlist_Show_One_File = 1 " 不同时显示多个文件的tag，只显示当前文件的
+let Tlist_Exit_OnlyWindow = 1 " 如果taglist窗口是最后一个窗口，则退出vim
+let Tlist_File_Fold_Auto_Close=1 " 自动折叠当前非编辑文件的方法列表
+let Tlist_Auto_Open = 0
+let Tlist_Auto_Update = 1
+let Tlist_Hightlight_Tag_On_BufEnter = 1
+let Tlist_Enable_Fold_Column = 0
+let Tlist_Process_File_Always = 1
+let Tlist_Display_Prototype = 0
+let Tlist_Compact_Format = 1
+map <C-F12> :!ctags -R --c++-kinds=+p --fields=+iaS --extra=+q .<CR>
+let csprg='/usr/bin/cscope'
+let cscopequickfix='-'
+set cst
+
+"-----------------------------------------------------------------
+" omnitags
+"-----------------------------------------------------------------
+nmap <silent><leader>t :OmniTagsLoad ./tags<CR>
+nmap <leader>u :OmniTagsUpdate
+
+"-----------------------------------------------------------------
+" plugin - NERD_tree.vim 以树状方式浏览系统中的文件和目录
+" :ERDtree 打开NERD_tree :NERDtreeClose 关闭NERD_tree
+" o 打开关闭文件或者目录 t 在标签页中打开
+" T 在后台标签页中打开 ! 执行此文件
+" p 到上层目录 P 到根目录
+" K 到第一个节点 J 到最后一个节点
+" u 打开上层目录 m 显示文件系统菜单（添加、删除、移动操作）
+" r 递归刷新当前目录 R 递归刷新当前根目录
+"-----------------------------------------------------------------
+" F3 NERDTree 切换
+map <F3> :NERDTreeToggle<CR>
+imap <F3> <ESC>:NERDTreeToggle<CR>
+let NERDTreeWinPos = "right"
+
+"-----------------------------------------------------------------
+" plugin - NERD_commenter.vim 注释代码用的，
+" [count],cc 光标以下count行逐行添加注释(7,cc)
+" [count],cu 光标以下count行逐行取消注释(7,cu)
+" [count],cm 光标以下count行尝试添加块注释(7,cm)
+" ,cA 在行尾插入 ,并且进入插入模式。 这个命令方便写注释。
+" 注：count参数可选，无则默认为选中行或当前行
+"-----------------------------------------------------------------
+let NERDSpaceDelims=1 " 让注释符与语句之间留一个空格
+let NERDCompactSexyComs=1 " 多行注释时样子更好看
+
+"-----------------------------------------------------------------
+" plugin - DoxygenToolkit.vim 由注释生成文档，并且能够快速生成函数标准注释
+"-----------------------------------------------------------------
+let g:DoxygenToolkit_authorName="qiaofengliang"
+let g:DoxygenToolkit_briefTag_funcName="yes"
+map <leader>da :DoxAuthor<CR>
+map <leader>df :Dox<CR>
+map <leader>db :DoxBlock<CR>
+map <leader>dc a <LEFT><LEFT><LEFT>
+"doxygen toolkit 
+let g:DoxygenToolkit_briefTag_pre="@synopsis  "
+let g:DoxygenToolkit_paramTag_pre="@param "
+let g:DoxygenToolkit_returnTag="@returns   "
+let g:DoxygenToolkit_blockHeader="--------------------------------------------------------------------------"
+let g:DoxygenToolkit_blockFooter="----------------------------------------------------------------------------"
+let g:doxygen_enhanced_color=1
+
+"-----------------------------------------------------------------
+" MiniBufExplorer
+"-----------------------------------------------------------------
+let g:miniBufExplMapCTabSwitchBufs = 1
+let g:miniBufExplMapWindowNavVim = 1
+let g:miniBufExplMapWindowNavArrows = 1
+
+"-----------------------------------------------------------------
+" neocomplcache 
+"-----------------------------------------------------------------
+let g:neocomplcache_enable_at_startup = 1
+let g:neocomplcache_enable_auto_select = 1
+
+"-----------------------------------------------------------------
+" cscope
+"-----------------------------------------------------------------
+if has("cscope")
+	set csprg=/usr/bin/cscope              "指定用来执行 cscope 的命令
+	set csto=1                             "先搜索tags标签文件，再搜索cscope数据库
+	set cst                                "使用|:cstag|(:cs find g)，而不是缺省的:tag
+	set nocsverb                           "不显示添加数据库是否成功
+	"add any database in current directory
+	if filereadable("cscope.out")
+		cs add cscope.out                   "添加cscope数据库
+	endif
+	set csverb                             "显示添加成功与否
+end
+
+nmap <C-\>s :cs find s <C-R>=expand("<cword>")<CR><CR>
+nmap <C-\>g :cs find g <C-R>=expand("<cword>")<CR><CR>
+nmap <C-\>c :cs find c <C-R>=expand("<cword>")<CR><CR>
+nmap <C-\>t :cs find t <C-R>=expand("<cword>")<CR><CR>
+nmap <C-\>e :cs find e <C-R>=expand("<cword>")<CR><CR>
+nmap <C-\>f :cs find f <C-R>=expand("<cfile>")<CR><CR>
+nmap <C-\>i :cs find i ^<C-R>=expand("<cfile>")<CR>$<CR>
+nmap <C-\>d :cs find d <C-R>=expand("<cword>")<CR><CR>
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" => VIM user interface
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Set 7 lines to the cursor - when moving vertically using j/k
+set so=7
 
 " Avoid garbled characters in Chinese language windows OS
 let $LANG='en' 
@@ -37,10 +292,10 @@ set langmenu=en
 source $VIMRUNTIME/delmenu.vim
 source $VIMRUNTIME/menu.vim
 
-" 开启命令补全的下拉列表
+" Turn on the WiLd menu
 set wildmenu
 
-" 忽略的文件
+" Ignore compiled files
 set wildignore=*.o,*~,*.pyc
 if has("win16") || has("win32")
     set wildignore+=*/.git/*,*/.hg/*,*/.svn/*,*/.DS_Store
@@ -48,66 +303,74 @@ else
     set wildignore+=.git\*,.hg\*,.svn\*
 endif
 
-" 显示行号和列号
+"Always show current position
 set ruler
 
-" 命令栏的高度
+" Height of the command bar
 set cmdheight=2
 
-" 当abandoned时隐藏缓存区
+" A buffer becomes hidden when it is abandoned
 set hid
 
-" 允许在某些字符上使用删除退格：eol换行符 indent自动缩进
-" start行开始位置
+" Configure backspace so it acts as it should act
 set backspace=eol,start,indent
 set whichwrap+=<,>,h,l
 
-" 查找时忽略大小写
+" In many terminal emulators the mouse works just fine, thus enable it.
+if has('mouse')
+  set mouse=a
+endif
+
+" Ignore case when searching
 set ignorecase
 
-" 智能查找，如果查找字符中包含大写字符，就关闭igorecase
+" When searching try to be smart about cases 
 set smartcase
 
-" 高亮查找结果
+" Highlight search results
 set hlsearch
 
-" 找到结果时，显示结果位置，并且高亮结果
-set incsearch
+" Makes search act like search in modern browsers
+set incsearch 
 
-" 执行宏、寄存器和其它不通过输入的命令时屏幕不会重画
-set lazyredraw
+" Don't redraw while executing macros (good performance config)
+set lazyredraw 
 
-" 正则表达式匹配时，除了 $ . * ^ 之外其他元字符都要加反斜杠
+" For regular expressions turn magic on
 set magic
 
-" 高亮匹配括号
-set showmatch
-
-" 显示匹配括号的十分之一秒数
+" Show matching brackets when text indicator is over them
+set showmatch 
+" How many tenths of a second to blink when matching brackets
 set mat=2
 
-" 关闭一些错误提示音
+" No annoying sound on errors
 set noerrorbells
 set novisualbell
 set t_vb=
-
-" 毫秒计的等待键码或者映射的键序列完成的时间
 set tm=500
 
+" Add a bit extra margin to the left
+set foldcolumn=1
+
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" 颜色和字体
+" => Colors and Fonts
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" 启用语法高亮
-syntax enable
+" Enable syntax highlighting
+syntax enable 
 
-" 设置主题和背景颜色
+try
+    colorscheme desert
+catch
+endtry
+
 set background=dark
 
-" 设置GUI模式参数
+" Set extra options when running in GUI mode
 if has("gui_running")
     set guioptions-=T
-    set guioptions+=e
+    set guioptions-=e
     set t_Co=256
     set guitablabel=%M\ %t
 endif
@@ -118,29 +381,30 @@ set encoding=utf8
 " Use Unix as the standard file type
 set ffs=unix,dos,mac
 
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" 文件备份
+" => Files, backups and undo
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Turn backup off, since most stuff is in SVN, git et.c anyway...
-" 关闭了文件备份和写备份，取消了swap文件
 set nobackup
 set nowb
 set noswapfile
 
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" 文本 tab和大小写
+" => Text, tab and indent related
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Use spaces instead of tabs
-" set expandtab
+"set expandtab
 
-" 在行和段开始处使用制表符
+" Be smart when using tabs ;)
 set smarttab
 
 " 1 tab == 4 spaces
 set shiftwidth=4
 set tabstop=4
 
-" 每行字符超过500后将换行
+" Linebreak on 500 characters
 set lbr
 set tw=500
 
@@ -148,22 +412,15 @@ set ai "Auto indent
 set si "Smart indent
 set wrap "Wrap lines
 
-""""""""""""""""""""""""""""""
-" 状态行
-""""""""""""""""""""""""""""""
-" 状态行的高度
-set laststatus=2
-
-" 状态行显示
-set statusline=\ %{HasPaste()}%F%m%r%h\ %w\ \ CWD:\ %r%{getcwd()}%h\ \ \ POS:\ %l:%v
 
 """"""""""""""""""""""""""""""
-" 可视模式相关
+" => Visual mode related
 """"""""""""""""""""""""""""""
-" 使用*或#查找当前可视模式选择的内容
+" Visual mode pressing * or # searches for the current selection
 " Super useful! From an idea by Michael Naumann
 vnoremap <silent> * :call VisualSelection('f', '')<CR>
 vnoremap <silent> # :call VisualSelection('b', '')<CR>
+
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Moving around, tabs, windows and buffers
@@ -226,6 +483,15 @@ autocmd BufReadPost *
 " Remember info about open buffers on close
 set viminfo^=%
 
+
+""""""""""""""""""""""""""""""
+" => Status line
+""""""""""""""""""""""""""""""
+" Always show the status line
+set laststatus=2
+
+" Format the status line
+set statusline=\ %{HasPaste()}%F%m%r%h\ %w\ \ CWD:\ %r%{getcwd()}%h\ \ \ Line:\ %l
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -315,16 +581,18 @@ map <leader>x :e ~/buffer.md<cr>
 " Toggle paste mode on and off
 map <leader>pp :setlocal paste!<cr>
 
+
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" 函数
+" => Helper functions
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! CmdLine(str)
     exe "menu Foo.Bar :" . a:str
     emenu Foo.Bar
     unmenu Foo
-endfunction
+endfunction 
 
-function! VisualSelection(direction) range
+function! VisualSelection(direction, extra_filter) range
     let l:saved_reg = @"
     execute "normal! vgvy"
 
@@ -334,7 +602,7 @@ function! VisualSelection(direction) range
     if a:direction == 'b'
         execute "normal ?" . l:pattern . "^M"
     elseif a:direction == 'gv'
-        call CmdLine("vimgrep " . '/'. l:pattern . '/' . ' **/*.')
+        call CmdLine("Ack \"" . l:pattern . "\" " )
     elseif a:direction == 'replace'
         call CmdLine("%s" . '/'. l:pattern . '/')
     elseif a:direction == 'f'
@@ -374,4 +642,4 @@ function! <SID>BufcloseCloseIt()
      execute("bdelete! ".l:currentBufNum)
    endif
 endfunction
-" => Visual mode related
+
